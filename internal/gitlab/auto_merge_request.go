@@ -29,7 +29,7 @@ func (a *autoMergeRequest) Init(config *internal.AutoMergeTaskConfiguration) err
 		if err != nil {
 			return err
 		}
-		client, err := a.initClient(token, url)
+		client, err := initClient(token, url)
 		if err != nil {
 			return err
 		}
@@ -114,12 +114,4 @@ func (a *autoMergeRequest) accept(mr *gitlab.MergeRequest) error {
 	}
 	log.Printf("merge request success.")
 	return nil
-}
-
-func (a *autoMergeRequest) initClient(token string, url string) (*gitlab.Client, error) {
-	c, err := gitlab.NewClient(token, gitlab.WithBaseURL(url))
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Failed to create client: %v", err))
-	}
-	return c, nil
 }
