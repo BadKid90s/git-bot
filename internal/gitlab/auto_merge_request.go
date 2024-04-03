@@ -9,19 +9,27 @@ import (
 	"log"
 )
 
-func New() internal.AutoMergeRequest {
+func NewAutoMergeRequest() internal.AutoMergeRequest {
 	return &autoMergeRequest{}
 }
 
 type autoMergeRequest struct {
 	client     *gitlab.Client
 	projectId  int
-	taskConfig *internal.TaskConfiguration
+	taskConfig *internal.AutoMergeTaskConfiguration
 }
 
-func (a *autoMergeRequest) Init(config *internal.TaskConfiguration) error {
+func (a *autoMergeRequest) Init(config *internal.AutoMergeTaskConfiguration) error {
 	if a.client == nil {
-		client, err := a.initClient(config.Global.Token, config.Global.Url)
+		token, err := config.GetToken()
+		if err != nil {
+			return err
+		}
+		url, err := config.GetUrl()
+		if err != nil {
+			return err
+		}
+		client, err := a.initClient(token, url)
 		if err != nil {
 			return err
 		}

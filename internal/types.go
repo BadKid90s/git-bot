@@ -1,11 +1,20 @@
 package internal
 
 type BotConfiguration struct {
-	Global            *GlobalConfiguration `yaml:"global"`
-	AutoMergeProjects []*AutoMergeProjects `yaml:"autoMergeProjects"`
+	Global                         *GlobalConfiguration      `yaml:"global"`
+	AutoMergeProjects              []*AutoMergeProject       `yaml:"autoMergeProjects"`
+	AutoCreateMergeRequestProjects []*AutoCreateMergeProject `yaml:"autoCreateMergeProjects"`
 }
 
-type AutoMergeProjects struct {
+type GlobalConfiguration struct {
+	Token string `yaml:"token"`
+	Url   string `yaml:"url"`
+}
+
+type AutoMergeProject struct {
+	Token string `yaml:"token"`
+	Url   string `yaml:"url"`
+
 	Name               string   `yaml:"name"`
 	MinReviewers       int      `yaml:"minReviewers"`
 	Reviewers          []string `yaml:"reviewers"`
@@ -14,12 +23,18 @@ type AutoMergeProjects struct {
 	CheckInterval      int      `yaml:"checkInterval"`
 }
 
-type GlobalConfiguration struct {
+type AutoCreateMergeProject struct {
 	Token string `yaml:"token"`
 	Url   string `yaml:"url"`
-}
 
-type TaskConfiguration struct {
-	MergeProjects *AutoMergeProjects
-	Global        *GlobalConfiguration
+	Name        string   `yaml:"name"`
+	Source      string   `yaml:"source"`
+	Target      string   `yaml:"target"`
+	CreateTime  string   `yaml:"createTime"`
+	Assignee    string   `yaml:"assignee"`
+	Title       string   `yaml:"title"`
+	Description string   `yaml:"description"`
+	milestone   string   `yaml:"milestone"`
+	Reviewers   []string `yaml:"reviewers"`
+	Labels      []string `yaml:"labels"`
 }

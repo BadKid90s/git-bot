@@ -19,11 +19,17 @@ func NewGitLabBot() *GitLabBot {
 }
 func (b *GitLabBot) Run() {
 	var wg sync.WaitGroup
-	tasks := NewBotTasks(b.botConfig.AutoMergeProjects, b.botConfig.Global, nil)
+	mrTasks := NewAutoMergeTasks(b.botConfig.AutoMergeProjects, b.botConfig.Global, &wg)
+	cmrTasks := NewAutoCreateMrTask(b.botConfig.AutoCreateMergeRequestProjects, b.botConfig.Global, &wg)
+
+	var tasks []internal.Task
+	tasks = append(tasks, mrTasks...)
+	tasks = append(tasks, cmrTasks...)
 	for _, task := range tasks {
 		wg.Add(1)
 		go task.Run()
 	}
+
 	log.Printf("bot start success.")
 	wg.Wait()
 }
