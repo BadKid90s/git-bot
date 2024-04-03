@@ -3,7 +3,7 @@ package internal
 type BotConfiguration struct {
 	Global                         *GlobalConfiguration      `yaml:"global"`
 	AutoMergeProjects              []*AutoMergeProject       `yaml:"autoMergeProjects"`
-	AutoCreateMergeRequestProjects []*AutoCreateMergeProject `yaml:"autoCreateMergeProjects"`
+	AutoCreateMergeRequestProjects []*AutoCreateMergeProject `yaml:"autoCreateMergeRequestProjects"`
 }
 
 type GlobalConfiguration struct {

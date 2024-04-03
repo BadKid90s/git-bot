@@ -26,19 +26,19 @@ autoMergeProjects:
     minReviewers: 1
     #检查的时间（单位：s）
     checkInterval: 3
-#autoCreateMergeProjects:
-#  - name: xxxx
-#    source: xxxxx
-#    target: xxxx
-#    createTime: xxxxx
-#    assignee: xxx
-#    title: xxxx
-#    description: xxx
-#    milestone: xxx
-#    reviewers:
-#      - xs
-#      - ls
-#      - ww
-#    labels:
-#      - xxx
-#      - xxx
+autoCreateMergeRequestProjects:
+  - name: gitlab-api-test
+    source: feature
+    target: master
+    createTime: "*/1 * * * *"
+    assignee: ls
+    title: xxxx
+    description: xxx
+    milestone: xxx
+    reviewers:
+      - xs
+      - zl
+      - ww
+    labels:
+      - xxx
+      - xxx
