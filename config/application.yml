@@ -3,8 +3,6 @@ global:
   url: https://gitlab.com/
 autoMergeProjects:
   - #项目名称
-    token: glpat-123
-    url: https://url
     name: gitlab-api-test
     #审核名称
     reviewers:
