@@ -47,13 +47,11 @@ func (a *autoCreateMergeRequest) Init(config *internal.AutoCreateMergeRequestTas
 	if err != nil {
 		return err
 	}
-
 	usernames := []string{
 		a.projectConfig.Assignee,
 	}
 	usernames = append(usernames, a.projectConfig.Reviewers...)
 	userMap := make(map[string]int)
-
 	for _, username := range usernames {
 		flag := false
 		for _, user := range users {
@@ -72,6 +70,7 @@ func (a *autoCreateMergeRequest) Init(config *internal.AutoCreateMergeRequestTas
 }
 
 func (a *autoCreateMergeRequest) CreateMergeRequest() {
+	log.Printf("auto create merge request start")
 	assigneeId := a.userMap[a.projectConfig.Assignee]
 	var reviewerIds []int
 	for _, reviewer := range a.projectConfig.Reviewers {

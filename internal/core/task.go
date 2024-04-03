@@ -59,4 +59,5 @@ func (t *AutoCreateMrTask) Run() {
 		log.Printf("project verify faild, project:%s, error:%s", t.taskConfig.Project.Name, err)
 		t.wg.Done()
 	}
+	t.acmr.CreateMergeRequest()
 }

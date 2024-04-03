@@ -3,42 +3,40 @@ global:
   token: glpat-QDFAAuezMXNd9A73GXDv
   #gitlab的地址
   url: https://gitlab.com/
-autoMergeProjects:
-  -
-    #gitlab创建的有权限访问API的token
-    #项目级别的配置优先级高于global级别的配置
-    #token: glpat-QDFAAuezMXNd9A73GXDv
-    #gitlab的地址
-    #项目级别的配置优先级高于global级别的配置
-    #url: https://gitlab.com/
-    #项目名称
-    name: gitlab-api-test
-    #检查或评论的用户名
-    reviewers:
-      - wangruiyu
-      - ls
-      - ww
-    #合并MR后是否删除原分支
-    removeSourceBranch: false
-    #评论的内容est notes faild
-    comment: check success
-    #最少审核人数
-    minReviewers: 1
-    #检查的时间（单位：s）
-    checkInterval: 3
+#autoMergeProjects:
+#  -
+#    #gitlab创建的有权限访问API的token
+#    #项目级别的配置优先级高于global级别的配置
+#    #token: glpat-QDFAAuezMXNd9A73GXDv
+#    #gitlab的地址
+#    #项目级别的配置优先级高于global级别的配置
+#    #url: https://gitlab.com/
+#    #项目名称
+#    name: gitlab-api-test
+#    #检查或评论的用户名
+#    reviewers:
+#      - wangruiyu
+#      - ls
+#      - ww
+#    #合并MR后是否删除原分支
+#    removeSourceBranch: false
+#    #评论的内容est notes faild
+#    comment: check success
+#    #最少审核人数
+#    minReviewers: 1
+#    #检查的时间（单位：s）
+#    checkInterval: 3
 autoCreateMergeRequestProjects:
   - name: gitlab-api-test
     source: feature
-    target: master
+    target: main
     createTime: "*/1 * * * *"
-    assignee: ls
+    assignee: wangruiyu
     title: xxxx
     description: xxx
     milestone: xxx
     reviewers:
-      - xs
-      - zl
-      - ww
+      - wangruiyu
     labels:
       - xxx
       - xxx
