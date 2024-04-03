@@ -14,19 +14,14 @@ type AutoMergeTask struct {
 	wg         *sync.WaitGroup
 }
 
-func NewAutoMergeTasks(projects []*internal.AutoMergeProject, global *internal.GlobalConfiguration, wg *sync.WaitGroup) []internal.Task {
-	var tasks []internal.Task
-	for _, p := range projects {
-		taskConfig := internal.NewAutoMergeTaskConfiguration(p, global)
-		amr := gitlab.NewAutoMergeRequest()
-		task := &AutoMergeTask{
-			taskConfig: taskConfig,
-			amr:        amr,
-			wg:         wg,
-		}
-		tasks = append(tasks, task)
+func NewAutoMergeTask(projects *internal.AutoMergeProject, global *internal.GlobalConfiguration, wg *sync.WaitGroup) *AutoMergeTask {
+	taskConfig := internal.NewAutoMergeTaskConfiguration(projects, global)
+	amr := gitlab.NewAutoMergeRequest()
+	return &AutoMergeTask{
+		taskConfig: taskConfig,
+		amr:        amr,
+		wg:         wg,
 	}
-	return tasks
 }
 
 func (t *AutoMergeTask) Run() {
@@ -47,20 +42,21 @@ type AutoCreateMrTask struct {
 	wg         *sync.WaitGroup
 }
 
-func NewAutoCreateMrTask(projects []*internal.AutoCreateMergeProject, global *internal.GlobalConfiguration, wg *sync.WaitGroup) []internal.Task {
-	var tasks []internal.Task
-	for _, p := range projects {
-		taskConfig := internal.NewAutoCreateMergeRequestTaskConfiguration(p, global)
-		acmr := gitlab.NewAutoCreateMergeRequest()
-		task := &AutoCreateMrTask{
-			taskConfig: taskConfig,
-			acmr:       acmr,
-			wg:         wg,
-		}
-		tasks = append(tasks, task)
+func NewAutoCreateMrTask(project *internal.AutoCreateMergeProject, global *internal.GlobalConfiguration, wg *sync.WaitGroup) *AutoCreateMrTask {
+	taskConfig := internal.NewAutoCreateMergeRequestTaskConfiguration(project, global)
+	acmr := gitlab.NewAutoCreateMergeRequest()
+	task := &AutoCreateMrTask{
+		taskConfig: taskConfig,
+		acmr:       acmr,
+		wg:         wg,
 	}
-	return tasks
+	return task
 }
 
 func (t *AutoCreateMrTask) Run() {
+	err := t.acmr.Init(t.taskConfig)
+	if err != nil {
+		log.Printf("project verify faild, project:%s, error:%s", t.taskConfig.Project.Name, err)
+		t.wg.Done()
+	}
 }

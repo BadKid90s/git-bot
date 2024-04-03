@@ -60,3 +60,33 @@ func MergeRequestAccept(client *gitlab.Client, projectId int, mrId int, removeSo
 	}
 	return req, nil
 }
+
+func CreateMergeRequest(client *gitlab.Client, projectId int, sourceBranch, targetBranch, title, description string, assigneeId int, reviewers []int, labels []string) (*gitlab.MergeRequest, error) {
+
+	var labelOptions gitlab.LabelOptions
+	labelOptions = append(labelOptions, labels...)
+
+	opt := &gitlab.CreateMergeRequestOptions{
+		SourceBranch: gitlab.Ptr(sourceBranch),
+		TargetBranch: gitlab.Ptr(targetBranch),
+		Title:        gitlab.Ptr(title),
+		Description:  gitlab.Ptr(description),
+		AssigneeID:   gitlab.Ptr(assigneeId),
+		ReviewerIDs:  &reviewers,
+		Labels:       &labelOptions,
+	}
+	req, _, err := client.MergeRequests.CreateMergeRequest(projectId, opt)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+func GetUserInfo(client *gitlab.Client, projectId int) ([]*gitlab.ProjectUser, error) {
+	opt := &gitlab.ListProjectUserOptions{}
+	users, _, err := client.Projects.ListProjectsUsers(projectId, opt)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
