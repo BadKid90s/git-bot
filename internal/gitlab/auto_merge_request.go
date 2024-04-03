@@ -3,7 +3,7 @@ package gitlab
 import (
 	"errors"
 	"fmt"
-	"github.com/jucardi/go-streams/streams"
+	"github.com/todocoder/go-stream/stream"
 	"github.com/xanzy/go-gitlab"
 	"gitlab-bot/internal"
 	"log"
@@ -87,18 +87,19 @@ func (a *autoMergeRequest) checkNotes(mr *gitlab.MergeRequest) error {
 		return errors.New(fmt.Sprintf("get merge request commits failed, error: %v", err))
 	}
 	//查询符合的评论个数
-	matchNum := streams.FromArray(notes).
-		Filter(func(v interface{}) bool {
-			n := v.(*gitlab.Note)
+	matchNum := stream.Of(notes...).
+		Filter(func(n *gitlab.Note) bool {
 			return n.Body == a.taskConfig.MergeProjects.Comment
 		}).
-		Filter(func(v interface{}) bool {
-			n := v.(*gitlab.Note)
-			return streams.FromArray(a.taskConfig.MergeProjects.Reviewers).Contains(n.Author.Username)
+		Filter(func(n *gitlab.Note) bool {
+			return stream.Of(a.taskConfig.MergeProjects.Reviewers...).
+				AnyMatch(func(s string) bool {
+					return s == n.Author.Username
+				})
 		}).Count()
 
 	//检查是否符合配置
-	if matchNum < a.taskConfig.MergeProjects.MinReviewers {
+	if matchNum < int64(a.taskConfig.MergeProjects.MinReviewers) {
 		return errors.New("merge request insufficient number of comments")
 	}
 	return nil
