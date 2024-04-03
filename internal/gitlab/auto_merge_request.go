@@ -105,7 +105,7 @@ func (a *autoMergeRequest) checkNotes(mr *gitlab.MergeRequest) error {
 }
 
 func (a *autoMergeRequest) accept(mr *gitlab.MergeRequest) error {
-	accept, err := MergeRequestAccept(a.client, a.projectId, mr.IID)
+	accept, err := MergeRequestAccept(a.client, a.projectId, mr.IID, a.taskConfig.MergeProjects.RemoveSourceBranch)
 	if err != nil {
 		return err
 	}

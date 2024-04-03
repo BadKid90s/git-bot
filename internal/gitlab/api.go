@@ -50,8 +50,10 @@ func MergeRequestNotes(client *gitlab.Client, projectId int, mrId int) ([]*gitla
 	return result, nil
 }
 
-func MergeRequestAccept(client *gitlab.Client, projectId int, mrId int) (*gitlab.MergeRequest, error) {
-	opt := &gitlab.AcceptMergeRequestOptions{}
+func MergeRequestAccept(client *gitlab.Client, projectId int, mrId int, removeSourceBranch bool) (*gitlab.MergeRequest, error) {
+	opt := &gitlab.AcceptMergeRequestOptions{
+		ShouldRemoveSourceBranch: gitlab.Ptr(removeSourceBranch),
+	}
 	req, _, err := client.MergeRequests.AcceptMergeRequest(projectId, mrId, opt)
 	if err != nil {
 		return nil, err
