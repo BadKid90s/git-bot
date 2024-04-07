@@ -12,8 +12,6 @@ type GitLabBot struct {
 }
 
 func NewGitLabBot() *GitLabBot {
-	botConfig := ParseConfigFile()
-	log.Printf("parse config file success.")
 	return &GitLabBot{
 		botConfig: botConfig,
 	}

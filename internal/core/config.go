@@ -1,32 +1,63 @@
 package core
 
 import (
+	"fmt"
 	"github.com/spf13/viper"
 	"gitlab-bot/internal"
+	"log"
 	"os"
 )
 
-func ParseConfigFile() *internal.BotConfiguration {
-	//获取项目的执行路径
-	path, err := os.Getwd()
-	if err != nil {
-		panic(err)
+var CfgFile string
+var cfgDir = "./config/"
+var defaultCfgName = "application.yml"
+
+var botConfig *internal.BotConfiguration
+
+func InitConfig() {
+	// Don't forget to read config either from cfgFile or from home directory!
+	if CfgFile != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(CfgFile)
+	} else {
+
+		exists, err := folderExists(cfgDir)
+		if err != nil {
+			log.Printf(fmt.Sprintf("folder exists error, %s", err))
+			os.Exit(1)
+		}
+		if !exists {
+			fmt.Println("Folder does not exist")
+			os.Exit(1)
+		}
+		// Search config in home directory with name ".cobra" (without extension).
+		viper.AddConfigPath(cfgDir)
+		viper.SetConfigName(defaultCfgName)
+		viper.SetConfigType("yaml") //设置文件的类型//尝试进行配置读取
 	}
 
-	vip := viper.New()
-	vip.AddConfigPath(path + "/config") //设置读取的文件路径
-	vip.SetConfigName("application")    //设置读取的文件名
-	vip.SetConfigType("yaml")           //设置文件的类型
-	//尝试进行配置读取
-	if err := vip.ReadInConfig(); err != nil {
-		panic(err)
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Println("Can't read config:", err)
+		os.Exit(1)
 	}
 
 	var botConfig *internal.BotConfiguration
-
-	err = vip.Unmarshal(&botConfig)
+	err := viper.Unmarshal(&botConfig)
 	if err != nil {
-		panic(err)
+		log.Printf(fmt.Sprintf("Unmarshal error, %s", err))
+		os.Exit(1)
 	}
-	return botConfig
+	log.Printf("parse config file success.")
+}
+
+// FolderExists 判断指定路径的文件夹是否存在
+func folderExists(folderPath string) (bool, error) {
+	fileInfo, err := os.Stat(folderPath)
+	if os.IsNotExist(err) {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+
+	return fileInfo.IsDir(), nil
 }
