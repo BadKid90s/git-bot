@@ -90,3 +90,18 @@ func GetUserInfo(client *gitlab.Client, projectId int) ([]*gitlab.ProjectUser, e
 	}
 	return users, nil
 }
+
+func ProjectBranchCompare(client *gitlab.Client, projectId int, fromBranch, toBranch string) (bool, error) {
+	opt := &gitlab.CompareOptions{
+		From: gitlab.Ptr(fromBranch),
+		To:   gitlab.Ptr(toBranch),
+	}
+	compare, _, err := client.Repositories.Compare(projectId, opt)
+	if err != nil {
+		return false, err
+	}
+	if len(compare.Diffs) > 0 {
+		return true, nil
+	}
+	return false, nil
+}

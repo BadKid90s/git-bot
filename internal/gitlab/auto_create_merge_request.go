@@ -66,11 +66,31 @@ func (a *autoCreateMergeRequest) Init(config *internal.AutoCreateMergeRequestTas
 			return errors.New(fmt.Sprintf("project not found user %s", username))
 		}
 	}
+	a.userMap = userMap
 	return nil
 }
 
 func (a *autoCreateMergeRequest) CreateMergeRequest() {
-	log.Printf("auto create merge request start")
+	log.Printf("start auto create merge request")
+
+	compareResult, err := ProjectBranchCompare(a.client, a.projectId, a.projectConfig.TargetBranch, a.projectConfig.SourceBranch)
+	if err != nil {
+		log.Printf("compare branch faild, error: %s", err)
+		return
+	}
+	if !compareResult {
+		log.Printf("branch not diff, no create merge request")
+		return
+	}
+
+	err = a.createMR()
+	if err != nil {
+		log.Printf("auto create merge request faild, error: %s", err)
+		return
+	}
+}
+
+func (a *autoCreateMergeRequest) createMR() error {
 	assigneeId := a.userMap[a.projectConfig.Assignee]
 	var reviewerIds []int
 	for _, reviewer := range a.projectConfig.Reviewers {
@@ -79,12 +99,9 @@ func (a *autoCreateMergeRequest) CreateMergeRequest() {
 
 	labels := a.projectConfig.Labels
 	_, err := CreateMergeRequest(
-		a.client, a.projectId, a.projectConfig.Source,
-		a.projectConfig.Target, a.projectConfig.Title, a.projectConfig.Description,
+		a.client, a.projectId, a.projectConfig.SourceBranch,
+		a.projectConfig.TargetBranch, a.projectConfig.Title, a.projectConfig.Description,
 		assigneeId, reviewerIds, labels,
 	)
-	if err != nil {
-		log.Printf("auto create merge request faild, error: %s", err)
-		return
-	}
+	return err
 }

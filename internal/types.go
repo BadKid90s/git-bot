@@ -27,14 +27,14 @@ type AutoCreateMergeProject struct {
 	Token string `yaml:"token"`
 	Url   string `yaml:"url"`
 
-	Name        string   `yaml:"name"`
-	Source      string   `yaml:"source"`
-	Target      string   `yaml:"target"`
-	CreateTime  string   `yaml:"createTime"`
-	Assignee    string   `yaml:"assignee"`
-	Title       string   `yaml:"title"`
-	Description string   `yaml:"description"`
-	milestone   string   `yaml:"milestone"`
-	Reviewers   []string `yaml:"reviewers"`
-	Labels      []string `yaml:"labels"`
+	Name         string   `yaml:"name"`
+	SourceBranch string   `yaml:"sourceBranch"`
+	TargetBranch string   `yaml:"targetBranch"`
+	CreateTime   string   `yaml:"createTime"`
+	Assignee     string   `yaml:"assignee"`
+	Title        string   `yaml:"title"`
+	Description  string   `yaml:"description"`
+	milestone    string   `yaml:"milestone"`
+	Reviewers    []string `yaml:"reviewers"`
+	Labels       []string `yaml:"labels"`
 }
