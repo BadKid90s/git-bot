@@ -13,3 +13,7 @@ var versionCmd = &cobra.Command{
 		fmt.Println("Gitlab-Bot v0.1 -- HEAD")
 	},
 }
+
+func init() {
+	rootCmd.AddCommand(versionCmd)
+}

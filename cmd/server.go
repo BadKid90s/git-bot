@@ -5,13 +5,17 @@ import (
 	"gitlab-bot/internal/core"
 )
 
+var bot *core.GitLabBot
+var cfgFile string
+
 var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "start an application program",
 	Long:  `start an application program. This is Gitlab-Bot`,
 	Run: func(cmd *cobra.Command, args []string) {
-		bot := core.NewGitLabBot()
-		bot.Run()
+		bot = core.NewGitLabBot()
+		bot.SetConfig(&cfgFile)
+		bot.Start()
 	},
 }
 
@@ -20,10 +24,15 @@ var stopCmd = &cobra.Command{
 	Short: "stop an application program",
 	Long:  `stop an application program. This is Gitlab-Bot`,
 	Run: func(cmd *cobra.Command, args []string) {
-
+		bot.Stop()
 	},
 }
 
 func init() {
-	startCmd.PersistentFlags().StringVar(&core.CfgFile, "config", "", "config file (default is ./config/application.yaml)")
+
+	rootCmd.AddCommand(startCmd)
+	rootCmd.AddCommand(stopCmd)
+
+	startCmd.PersistentFlags().StringVarP(&cfgFile, "config", "f", "./config/application.yml", "config file (default is ./config/application.yaml)")
+
 }

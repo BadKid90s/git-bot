@@ -1,63 +1,73 @@
 package core
 
 import (
+	"fmt"
 	"gitlab-bot/internal"
 	"gitlab-bot/internal/gitlab"
-	"log"
-	"sync"
+	"golang.org/x/net/context"
 	"time"
 )
 
-type AutoMergeTask struct {
-	taskConfig *internal.AutoMergeTaskConfiguration
-	amr        internal.AutoMergeRequest
-	wg         *sync.WaitGroup
-}
-
-func NewAutoMergeTask(projects *internal.AutoMergeProject, global *internal.GlobalConfiguration, wg *sync.WaitGroup) *AutoMergeTask {
+func NewAutoMergeTask(projects *internal.AutoMergeProject, global *internal.GlobalConfiguration, ctx context.Context) *AutoMergeTask {
 	taskConfig := internal.NewAutoMergeTaskConfiguration(projects, global)
 	amr := gitlab.NewAutoMergeRequest()
 	return &AutoMergeTask{
 		taskConfig: taskConfig,
 		amr:        amr,
-		wg:         wg,
+		ctx:        ctx,
 	}
 }
 
+type AutoMergeTask struct {
+	ctx        context.Context
+	taskConfig *internal.AutoMergeTaskConfiguration
+	amr        internal.AutoMergeRequest
+}
+
+func (t *AutoMergeTask) Init() error {
+	return t.amr.Init(t.taskConfig)
+}
 func (t *AutoMergeTask) Run() {
-	err := t.amr.Init(t.taskConfig)
-	if err != nil {
-		log.Printf("project verify faild, project:%s, error:%s", t.taskConfig.MergeProjects.Name, err)
-		t.wg.Done()
-	}
 	for {
-		time.Sleep(time.Second * time.Duration(t.taskConfig.MergeProjects.CheckInterval))
-		t.amr.MergeRequest()
+		select {
+		case <-t.ctx.Done():
+			fmt.Printf("Task has stopped\n")
+			return
+		default:
+			time.Sleep(time.Second * time.Duration(t.taskConfig.MergeProjects.CheckInterval))
+			t.amr.MergeRequest()
+		}
 	}
 }
 
-type AutoCreateMrTask struct {
-	taskConfig *internal.AutoCreateMergeRequestTaskConfiguration
-	acmr       internal.AutoCreateMergeRequest
-	wg         *sync.WaitGroup
-}
-
-func NewAutoCreateMrTask(project *internal.AutoCreateMergeProject, global *internal.GlobalConfiguration, wg *sync.WaitGroup) *AutoCreateMrTask {
+func NewAutoCreateMrTask(project *internal.AutoCreateMergeProject, global *internal.GlobalConfiguration, ctx context.Context) *AutoCreateMrTask {
 	taskConfig := internal.NewAutoCreateMergeRequestTaskConfiguration(project, global)
 	acmr := gitlab.NewAutoCreateMergeRequest()
 	task := &AutoCreateMrTask{
 		taskConfig: taskConfig,
 		acmr:       acmr,
-		wg:         wg,
+		ctx:        ctx,
 	}
 	return task
 }
 
+type AutoCreateMrTask struct {
+	ctx        context.Context
+	taskConfig *internal.AutoCreateMergeRequestTaskConfiguration
+	acmr       internal.AutoCreateMergeRequest
+}
+
+func (t *AutoCreateMrTask) Init() error {
+	return t.acmr.Init(t.taskConfig)
+}
+
 func (t *AutoCreateMrTask) Run() {
-	err := t.acmr.Init(t.taskConfig)
-	if err != nil {
-		log.Printf("project verify faild, project:%s, error:%s", t.taskConfig.Project.Name, err)
-		t.wg.Done()
+	select {
+	case <-t.ctx.Done():
+		fmt.Printf("Task has stopped\n")
+		return
+	default:
+		t.acmr.CreateMergeRequest()
 	}
-	t.acmr.CreateMergeRequest()
+
 }
