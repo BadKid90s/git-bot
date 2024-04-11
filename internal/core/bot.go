@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"github.com/robfig/cron"
 	"gitlab-bot/internal"
 	"golang.org/x/net/context"
@@ -27,20 +26,26 @@ func NewGitLabBot() *GitLabBot {
 		c:      cron.New(),
 	}
 }
-func (b *GitLabBot) Start() {
+func (b *GitLabBot) Start() error {
+	go b.run()
+	return nil
+}
+
+func (b *GitLabBot) run() {
+	log.Println("bot starting .")
 
 	b.cfg = initConfig(b.configFile)
 
 	b.runMrTasks()
 	b.runAutoCreateMrTasks()
 
-	log.Printf("bot start success.")
+	log.Println("bot start success.")
 
 	for {
 		select {
 		case <-b.ctx.Done():
 			// 如果context被取消，则停止定时任务
-			fmt.Println("定时任务被停止")
+			log.Println("定时任务被停止")
 			return
 		}
 	}
@@ -62,7 +67,10 @@ func (b *GitLabBot) runMrTasks() {
 		}
 		b.wg.Add(1)
 
-		go task.Run()
+		go func(t internal.Task) {
+			defer b.wg.Done()
+			t.Run()
+		}(task)
 	}
 }
 
@@ -78,7 +86,7 @@ func (b *GitLabBot) runAutoCreateMrTasks() {
 			task.Run()
 		})
 		if err != nil {
-			log.Printf("task runing error, error: %s", err)
+			log.Printf("task runing error, error: %s \n", err)
 			b.wg.Done()
 		}
 	}

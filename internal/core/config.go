@@ -23,6 +23,8 @@ func initConfig(cfgFile *string) *internal.BotConfiguration {
 			os.Exit(1)
 		}
 		if !exists {
+			str, _ := os.Getwd()
+			log.Printf("Folder path is %s", str)
 			fmt.Println("Folder does not exist")
 			os.Exit(1)
 		}

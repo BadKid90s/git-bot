@@ -31,7 +31,7 @@ func (t *AutoMergeTask) Run() {
 	for {
 		select {
 		case <-t.ctx.Done():
-			fmt.Printf("Task has stopped\n")
+			fmt.Printf("MR Task has stopped\n")
 			return
 		default:
 			time.Sleep(time.Second * time.Duration(t.taskConfig.MergeProjects.CheckInterval))
@@ -64,10 +64,9 @@ func (t *AutoCreateMrTask) Init() error {
 func (t *AutoCreateMrTask) Run() {
 	select {
 	case <-t.ctx.Done():
-		fmt.Printf("Task has stopped\n")
+		fmt.Printf(" CreateMR Task has stopped\n")
 		return
 	default:
 		t.acmr.CreateMergeRequest()
 	}
-
 }
