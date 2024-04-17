@@ -6,6 +6,7 @@ import (
 	"golang.org/x/net/context"
 	"log"
 	"sync"
+	"time"
 )
 
 type GitLabBot struct {
@@ -26,29 +27,38 @@ func NewGitLabBot() *GitLabBot {
 		c:      cron.New(),
 	}
 }
-func (b *GitLabBot) Start() error {
-	go b.run()
-	return nil
-}
-
-func (b *GitLabBot) run() {
+func (b *GitLabBot) Start() {
 	log.Println("bot starting .")
 
-	b.cfg = initConfig(b.configFile)
-
-	b.runMrTasks()
-	b.runAutoCreateMrTasks()
-
-	log.Println("bot start success.")
+	tick := time.Tick(3 * time.Second)
 
 	for {
 		select {
-		case <-b.ctx.Done():
-			// 如果context被取消，则停止定时任务
-			log.Println("定时任务被停止")
-			return
+		case <-tick:
+			t := time.Now()
+			now := t.Format("2006-01-02 15:04:05")
+			log.Printf("当前时间： %s  \n", now)
 		}
 	}
+
+	//b.cfg = initConfig(b.configFile)
+
+	//b.runMrTasks()
+	//b.runAutoCreateMrTasks()
+	//
+	//log.Println("bot start success.")
+	//
+	//for {
+	//	select {
+	//	case <-b.ctx.Done():
+	//		// 如果context被取消，则停止定时任务
+	//		log.Println("定时任务被停止")
+	//		return
+	//	default:
+	//		time.Sleep(time.Second * 1)
+	//		log.Println("select")
+	//	}
+	//}
 }
 
 func (b *GitLabBot) Stop() {

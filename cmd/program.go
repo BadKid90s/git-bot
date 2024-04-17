@@ -1,65 +1,39 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/kardianos/service"
+	"github.com/mitchellh/go-homedir"
 	"gitlab-bot/internal/core"
 	"log"
+	"path/filepath"
 )
 
-var serviceConfig = &service.Config{
-	Name:        "gitlab-bot",
-	DisplayName: "gitlab bot",
-}
-
 var bot *core.GitLabBot
-var srv service.Service
 
-type program struct {
-}
+type Program struct{}
 
-func (ss *program) Start(service.Service) error {
-	log.Println("coming Start.......")
-	go ss.run()
+func (p *Program) Start(service.Service) error {
+	log.Println("server running...")
+	go p.run()
 	return nil
 }
-
-func (ss *program) run() {
-	log.Println("coming run.......")
-	err := bot.Start()
-	if err != nil {
-		log.Println(err)
-	}
+func (p *Program) run() {
+	// 具体的服务实现
+	bot.Start()
 }
 
-func (ss *program) Stop(service.Service) error {
-	log.Println("coming Stop.......")
+func (p *Program) Stop(service.Service) error {
 	bot.Stop()
-	return nil
-}
-
-func createService() service.Service {
-	log.Println("service.Interactive()---->", service.Interactive())
-	return srv
-}
-
-func startAction() error {
-	// 默认 运行 Run
-	err := srv.Run()
-	if err != nil {
-		log.Printf("service Run failed, err: %v\n", err)
-		return err
-	}
-
 	return nil
 }
 
 func init() {
 	bot = core.NewGitLabBot()
-	bot.SetConfig(&cfgFile)
-	ss := &program{}
-	s, err := service.New(ss, serviceConfig)
+	dir, err := homedir.Dir()
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
-	srv = s
+	configName := fmt.Sprintf("%s%sgitlab-bot.yml", dir, string(filepath.Separator))
+	bot.SetConfig(&configName)
 }
