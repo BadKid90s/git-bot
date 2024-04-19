@@ -1,17 +1,17 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"github.com/spf13/viper"
 	"gitlab-bot/internal"
-	"log"
 	"os"
 )
 
 var cfgDir = "./config/"
 var defaultCfgName = "application.yml"
 
-func initConfig(cfgFile *string) *internal.BotConfiguration {
+func initConfig(cfgFile *string) (*internal.BotConfiguration, error) {
 	// Don't forget to read config either from cfgFile or from home directory!
 	if cfgFile != nil {
 		// Use config file from the flag.
@@ -19,14 +19,11 @@ func initConfig(cfgFile *string) *internal.BotConfiguration {
 	} else {
 		exists, err := folderExists(cfgDir)
 		if err != nil {
-			log.Printf(fmt.Sprintf("folder exists error, %s", err))
-			os.Exit(1)
+			return nil, errors.New(fmt.Sprintf("config file folder exists error, %s", err))
 		}
 		if !exists {
 			str, _ := os.Getwd()
-			log.Printf("Folder path is %s", str)
-			fmt.Println("Folder does not exist")
-			os.Exit(1)
+			return nil, errors.New(fmt.Sprintf("config file folder does not exist,path :%s", str))
 		}
 
 		// Search config in home directory with name ".cobra" (without extension).
@@ -37,17 +34,14 @@ func initConfig(cfgFile *string) *internal.BotConfiguration {
 	var botConfig *internal.BotConfiguration
 
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println("Can't read config:", err)
-		os.Exit(1)
+		return nil, errors.New(fmt.Sprintf("Can't read config: %s \n", err))
 	}
 
 	err := viper.Unmarshal(&botConfig)
 	if err != nil {
-		log.Printf(fmt.Sprintf("Unmarshal error, %s", err))
-		os.Exit(1)
+		return nil, errors.New(fmt.Sprintf("Unmarshal error, %s", err))
 	}
-	log.Printf("parse config file success.")
-	return botConfig
+	return botConfig, nil
 }
 
 // FolderExists 判断指定路径的文件夹是否存在

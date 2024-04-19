@@ -1,0 +1,61 @@
+global:
+  #gitlab创建的有权限访问API的token
+  token: glpat-QDFAAuezMXNd9A73GXDv
+  #gitlab的地址
+  url: https://gitlab.com/
+#自动合并MR请求
+autoMergeProjects:
+  -
+    #gitlab创建的有权限访问API的token
+    #项目级别的配置优先级高于global级别的配置
+    #token: glpat-QDFAAuezMXNd9A73GXDv
+    #gitlab的地址
+    #项目级别的配置优先级高于global级别的配置
+    #url: https://gitlab.com/
+    #项目名称
+    name: gitlab-api-test
+    #检查或评论的用户名
+    reviewers:
+      - wangruiyu
+      - ls
+      - ww
+    #合并MR后是否删除原分支
+    removeSourceBranch: false
+    #评论的内容est notes faild
+    comment: check success
+    #最少审核人数
+    minReviewers: 1
+    #检查的时间（单位：s）
+    checkInterval: 3
+#定时创建MR请求
+autoCreateMergeRequestProjects:
+  -
+    #gitlab创建的有权限访问API的token
+    #项目级别的配置优先级高于global级别的配置
+    #token: glpat-QDFAAuezMXNd9A73GXDv
+    #gitlab的地址
+    #项目级别的配置优先级高于global级别的配置
+    #url: https://gitlab.com/
+    #项目名称
+    name: gitlab-api-test
+    #源分支
+    sourceBranch: feature-4
+    #目标分支
+    targetBranch: main
+    #创建的时间周期（cron表达式）
+    createTime: "*/10 * * * *"
+    #MR指派人
+    assignee: wangruiyu
+    #MR标题
+    title: xxxx
+    #MR描述
+    description: xxx
+    #MR里程碑
+    milestone: xxx
+    #MR代码检查人
+    reviewers:
+      - wangruiyu
+    #标签
+    labels:
+      - xxx
+      - xxx

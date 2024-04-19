@@ -2,8 +2,8 @@ package gitlab
 
 import (
 	"errors"
+	"fmt"
 	"github.com/xanzy/go-gitlab"
-	"log"
 )
 
 func GetProjectId(client *gitlab.Client, name string) (int, error) {
@@ -12,7 +12,7 @@ func GetProjectId(client *gitlab.Client, name string) (int, error) {
 	}
 	projects, _, err := client.Projects.ListProjects(opt)
 	if err != nil {
-		log.Printf("get projects error: %v", err)
+		return 0, errors.New(fmt.Sprintf("get projects error: %v\"", err))
 	}
 	for _, project := range projects {
 		if project.Name == name {

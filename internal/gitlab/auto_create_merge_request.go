@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/xanzy/go-gitlab"
 	"gitlab-bot/internal"
-	"log"
+	"gitlab-bot/logger"
 )
 
 func NewAutoCreateMergeRequest() internal.AutoCreateMergeRequest {
@@ -71,21 +71,21 @@ func (a *autoCreateMergeRequest) Init(config *internal.AutoCreateMergeRequestTas
 }
 
 func (a *autoCreateMergeRequest) CreateMergeRequest() {
-	log.Printf("start auto create merge request")
+	logger.Log.Infoln("start auto create merge request")
 
 	compareResult, err := ProjectBranchCompare(a.client, a.projectId, a.projectConfig.TargetBranch, a.projectConfig.SourceBranch)
 	if err != nil {
-		log.Printf("compare branch faild, error: %s", err)
+		logger.Log.Infof("compare branch faild, error: %s \n", err)
 		return
 	}
 	if !compareResult {
-		log.Printf("branch not diff, no create merge request")
+		logger.Log.Infof("branch not diff, no create merge request \n")
 		return
 	}
 
 	err = a.createMR()
 	if err != nil {
-		log.Printf("auto create merge request faild, error: %s", err)
+		logger.Log.Infof("auto create merge request faild, error: %s \n", err)
 		return
 	}
 }

@@ -1,39 +1,37 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/kardianos/service"
-	"github.com/mitchellh/go-homedir"
 	"gitlab-bot/internal/core"
-	"log"
 	"path/filepath"
 )
 
 var bot *core.GitLabBot
+var LOGGER service.Logger
 
 type Program struct{}
 
 func (p *Program) Start(service.Service) error {
-	log.Println("server running...")
+	LOGGER.Info("server start running...")
 	go p.run()
 	return nil
 }
 func (p *Program) run() {
+	LOGGER.Info("server running...")
 	// 具体的服务实现
 	bot.Start()
 }
 
 func (p *Program) Stop(service.Service) error {
+	LOGGER.Info("server stop...")
 	bot.Stop()
 	return nil
 }
 
 func init() {
+	//configName := filepath.Join(".", "config", "gitlab-bot.yml")
+	configName := filepath.Join("D:\\", "gitlab-bot.yml")
+
 	bot = core.NewGitLabBot()
-	dir, err := homedir.Dir()
-	if err != nil {
-		log.Fatal(err)
-	}
-	configName := fmt.Sprintf("%s%sgitlab-bot.yml", dir, string(filepath.Separator))
 	bot.SetConfig(&configName)
 }

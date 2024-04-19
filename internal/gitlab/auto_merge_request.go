@@ -6,7 +6,7 @@ import (
 	"github.com/todocoder/go-stream/stream"
 	"github.com/xanzy/go-gitlab"
 	"gitlab-bot/internal"
-	"log"
+	"gitlab-bot/logger"
 )
 
 func NewAutoMergeRequest() internal.AutoMergeRequest {
@@ -46,7 +46,7 @@ func (a *autoMergeRequest) Init(config *internal.AutoMergeTaskConfiguration) err
 }
 
 func (a *autoMergeRequest) isReady() ([]*gitlab.MergeRequest, error) {
-	log.Printf("start check merge request is ready")
+	logger.Log.Infoln("start check merge request is ready")
 	//查询MR
 	mrs, err := ProjectMergeRequests(a.client, a.projectId)
 	if err != nil {
@@ -63,18 +63,18 @@ func (a *autoMergeRequest) isReady() ([]*gitlab.MergeRequest, error) {
 func (a *autoMergeRequest) MergeRequest() {
 	mrs, err := a.isReady()
 	if err != nil {
-		log.Printf("merge request not ready, error: %s", err)
+		logger.Log.Infof("merge request not ready, error: %s \n", err)
 		return
 	}
 	for _, mr := range mrs {
 		err := a.checkNotes(mr)
 		if err != nil {
-			log.Printf("checked merge request notes faild, error: %s", err)
+			logger.Log.Infof("checked merge request notes faild, error: %s \n", err)
 			return
 		}
 		err = a.accept(mr)
 		if err != nil {
-			log.Printf("auto merge request faild, error: %s", err)
+			logger.Log.Infof("auto merge request faild, error: %s \n", err)
 			return
 		}
 	}
@@ -113,6 +113,6 @@ func (a *autoMergeRequest) accept(mr *gitlab.MergeRequest) error {
 	if accept.State != "merged" {
 		return errors.New(fmt.Sprintf("accept merge request failed, error %s", accept.MergeError))
 	}
-	log.Printf("merge request success.")
+	logger.Log.Infof("merge request success.")
 	return nil
 }

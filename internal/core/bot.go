@@ -3,8 +3,8 @@ package core
 import (
 	"github.com/robfig/cron"
 	"gitlab-bot/internal"
+	"gitlab-bot/logger"
 	"golang.org/x/net/context"
-	"log"
 	"sync"
 	"time"
 )
@@ -28,35 +28,39 @@ func NewGitLabBot() *GitLabBot {
 	}
 }
 func (b *GitLabBot) Start() {
-	log.Println("bot starting .")
+	logger.Log.Infoln("bot starting .")
 
 	tick := time.Tick(3 * time.Second)
-
 	for {
 		select {
 		case <-tick:
 			t := time.Now()
 			now := t.Format("2006-01-02 15:04:05")
-			log.Printf("当前时间： %s  \n", now)
+			logger.Log.Printf("当前时间： %s  \n", now)
 		}
 	}
 
-	//b.cfg = initConfig(b.configFile)
-
+	//config, err := initConfig(b.configFile)
+	//if err != nil {
+	//	logger.Log.Errorln(err.Error())
+	//	return
+	//}
+	//logger.Log.Infoln("bot config parse success.")
+	//b.cfg = config
+	//
 	//b.runMrTasks()
 	//b.runAutoCreateMrTasks()
-	//
-	//log.Println("bot start success.")
+	//logger.Log.Infoln("bot start success.")
 	//
 	//for {
 	//	select {
 	//	case <-b.ctx.Done():
 	//		// 如果context被取消，则停止定时任务
-	//		log.Println("定时任务被停止")
+	//		logger.Log.Infoln("定时任务被停止")
 	//		return
-	//	default:
-	//		time.Sleep(time.Second * 1)
-	//		log.Println("select")
+	//		//default:
+	//		//	time.Sleep(time.Second * 1)
+	//		//	log.Println("select")
 	//	}
 	//}
 }
@@ -96,7 +100,7 @@ func (b *GitLabBot) runAutoCreateMrTasks() {
 			task.Run()
 		})
 		if err != nil {
-			log.Printf("task runing error, error: %s \n", err)
+			logger.Log.Errorf("task runing error, error: %s \n", err)
 			b.wg.Done()
 		}
 	}
