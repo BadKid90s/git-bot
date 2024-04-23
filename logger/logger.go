@@ -144,6 +144,7 @@ var Log *ModuleLogger
 
 func init() {
 	newLogger, err := NewModuleLogger("./gitlab_bot.log", INFO, "main")
+	//newLogger, err := NewModuleLogger("D:\\gitlab-bot\\gitlab_bot.log", INFO, "main")
 	if err != nil {
 		fmt.Println("init logger failed")
 		os.Exit(1)

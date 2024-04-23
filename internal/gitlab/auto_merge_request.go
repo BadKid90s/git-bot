@@ -49,7 +49,7 @@ func (a *autoMergeRequest) Init(config *internal.AutoMergeTaskConfiguration) err
 }
 
 func (a *autoMergeRequest) isReady() ([]*gitlab.MergeRequest, error) {
-	logger.Log.WithModule(a.projectName).Infoln("start check merge request is ready")
+	logger.Log.WithModule(a.projectName).Debugln("start check merge request is ready")
 	//查询MR
 	mrs, err := ProjectMergeRequests(a.client, a.projectId)
 	if err != nil {
@@ -64,22 +64,25 @@ func (a *autoMergeRequest) isReady() ([]*gitlab.MergeRequest, error) {
 }
 
 func (a *autoMergeRequest) MergeRequest() {
+	logger.Log.WithModule(a.projectName).Infoln("start merge request ")
+
 	mrs, err := a.isReady()
 	if err != nil {
-		logger.Log.WithModule(a.projectName).Infof("merge request not ready, error: %s \n", err)
+		logger.Log.WithModule(a.projectName).Errorf("merge request not ready, error: %s \n", err)
 		return
 	}
 	for _, mr := range mrs {
 		err := a.checkNotes(mr)
 		if err != nil {
-			logger.Log.WithModule(a.projectName).Infof("checked merge request notes failed, error: %s \n", err)
+			logger.Log.WithModule(a.projectName).Debugf("checked merge request notes failed, error: %s \n", err)
 			return
 		}
 		err = a.accept(mr)
 		if err != nil {
-			logger.Log.WithModule(a.projectName).Infof("auto merge request failed, error: %s \n", err)
+			logger.Log.WithModule(a.projectName).Errorf("auto merge request failed, error: %s \n", err)
 			return
 		}
+		logger.Log.WithModule(a.projectName).Infoln("merge request success")
 	}
 }
 
@@ -116,6 +119,5 @@ func (a *autoMergeRequest) accept(mr *gitlab.MergeRequest) error {
 	if accept.State != "merged" {
 		return errors.New(fmt.Sprintf("accept merge request failed, error %s", accept.MergeError))
 	}
-	logger.Log.WithModule(a.projectName).Infoln("merge request success.")
 	return nil
 }

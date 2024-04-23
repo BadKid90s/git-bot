@@ -74,23 +74,25 @@ func (a *autoCreateMergeRequest) Init(config *internal.AutoCreateMergeRequestTas
 }
 
 func (a *autoCreateMergeRequest) CreateMergeRequest() {
-	logger.Log.WithModule(a.projectName).Infoln("start auto create merge request")
+	logger.Log.WithModule(a.projectName).Infoln("start auto create MR")
 
 	compareResult, err := ProjectBranchCompare(a.client, a.projectId, a.projectConfig.TargetBranch, a.projectConfig.SourceBranch)
 	if err != nil {
-		logger.Log.WithModule(a.projectName).Infof("compare branch faild, error: %s \n", err)
+		logger.Log.WithModule(a.projectName).Errorf("compare branch failed, error: %s \n", err)
 		return
 	}
 	if !compareResult {
-		logger.Log.WithModule(a.projectName).Infoln("branch not diff, no create merge request \n")
+		logger.Log.WithModule(a.projectName).Errorln("branch not diff, no create MR \n")
 		return
 	}
 
 	err = a.createMR()
 	if err != nil {
-		logger.Log.WithModule(a.projectName).Infof("auto create merge request faild, error: %s \n", err)
+		logger.Log.WithModule(a.projectName).Errorln(err.Error())
 		return
 	}
+	logger.Log.WithModule(a.projectName).Infoln("auto create MR success")
+
 }
 
 func (a *autoCreateMergeRequest) createMR() error {
