@@ -8,6 +8,7 @@ import (
 
 func GetProjectId(client *gitlab.Client, name string) (int, error) {
 	opt := &gitlab.ListProjectsOptions{
+		//Membership: gitlab.Ptr(true),
 		Owned: gitlab.Ptr(true),
 	}
 	projects, _, err := client.Projects.ListProjects(opt)

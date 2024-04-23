@@ -29,8 +29,8 @@ func (p *Program) Stop(service.Service) error {
 }
 
 func init() {
-	//configName := filepath.Join(".", "config", "gitlab-bot.yml")
-	configName := filepath.Join("D:\\", "gitlab-bot.yml")
+	configName := filepath.Join(".", "config", "gitlab-bot.yml")
+	//configName := filepath.Join("D:\\", "gitlab-bot.yml")
 
 	bot = core.NewGitLabBot()
 	bot.SetConfig(&configName)

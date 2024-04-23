@@ -6,6 +6,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 	"gitlab-bot/internal"
 	"gitlab-bot/logger"
+	"strings"
 )
 
 func NewAutoCreateMergeRequest() internal.AutoCreateMergeRequest {
@@ -16,6 +17,7 @@ type autoCreateMergeRequest struct {
 	client        *gitlab.Client
 	projectConfig *internal.AutoCreateMergeProject
 	projectId     int
+	projectName   string
 	userMap       map[string]int
 }
 
@@ -42,6 +44,7 @@ func (a *autoCreateMergeRequest) Init(config *internal.AutoCreateMergeRequestTas
 		return err
 	}
 	a.projectId = projectId
+	a.projectName = name
 
 	users, err := GetUserInfo(a.client, projectId)
 	if err != nil {
@@ -56,7 +59,7 @@ func (a *autoCreateMergeRequest) Init(config *internal.AutoCreateMergeRequestTas
 		flag := false
 		for _, user := range users {
 			uname := user.Username
-			if username == uname {
+			if strings.ToLower(username) == strings.ToLower(uname) {
 				userMap[username] = user.ID
 				flag = true
 				break
@@ -71,21 +74,21 @@ func (a *autoCreateMergeRequest) Init(config *internal.AutoCreateMergeRequestTas
 }
 
 func (a *autoCreateMergeRequest) CreateMergeRequest() {
-	logger.Log.Infoln("start auto create merge request")
+	logger.Log.WithModule(a.projectName).Infoln("start auto create merge request")
 
 	compareResult, err := ProjectBranchCompare(a.client, a.projectId, a.projectConfig.TargetBranch, a.projectConfig.SourceBranch)
 	if err != nil {
-		logger.Log.Infof("compare branch faild, error: %s \n", err)
+		logger.Log.WithModule(a.projectName).Infof("compare branch faild, error: %s \n", err)
 		return
 	}
 	if !compareResult {
-		logger.Log.Infof("branch not diff, no create merge request \n")
+		logger.Log.WithModule(a.projectName).Infoln("branch not diff, no create merge request \n")
 		return
 	}
 
 	err = a.createMR()
 	if err != nil {
-		logger.Log.Infof("auto create merge request faild, error: %s \n", err)
+		logger.Log.WithModule(a.projectName).Infof("auto create merge request faild, error: %s \n", err)
 		return
 	}
 }

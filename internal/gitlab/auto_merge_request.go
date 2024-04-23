@@ -7,6 +7,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 	"gitlab-bot/internal"
 	"gitlab-bot/logger"
+	"strings"
 )
 
 func NewAutoMergeRequest() internal.AutoMergeRequest {
@@ -14,9 +15,10 @@ func NewAutoMergeRequest() internal.AutoMergeRequest {
 }
 
 type autoMergeRequest struct {
-	client     *gitlab.Client
-	projectId  int
-	taskConfig *internal.AutoMergeTaskConfiguration
+	client      *gitlab.Client
+	projectId   int
+	projectName string
+	taskConfig  *internal.AutoMergeTaskConfiguration
 }
 
 func (a *autoMergeRequest) Init(config *internal.AutoMergeTaskConfiguration) error {
@@ -42,11 +44,12 @@ func (a *autoMergeRequest) Init(config *internal.AutoMergeTaskConfiguration) err
 		return err
 	}
 	a.projectId = projectId
+	a.projectName = name
 	return nil
 }
 
 func (a *autoMergeRequest) isReady() ([]*gitlab.MergeRequest, error) {
-	logger.Log.Infoln("start check merge request is ready")
+	logger.Log.WithModule(a.projectName).Infoln("start check merge request is ready")
 	//查询MR
 	mrs, err := ProjectMergeRequests(a.client, a.projectId)
 	if err != nil {
@@ -63,18 +66,18 @@ func (a *autoMergeRequest) isReady() ([]*gitlab.MergeRequest, error) {
 func (a *autoMergeRequest) MergeRequest() {
 	mrs, err := a.isReady()
 	if err != nil {
-		logger.Log.Infof("merge request not ready, error: %s \n", err)
+		logger.Log.WithModule(a.projectName).Infof("merge request not ready, error: %s \n", err)
 		return
 	}
 	for _, mr := range mrs {
 		err := a.checkNotes(mr)
 		if err != nil {
-			logger.Log.Infof("checked merge request notes faild, error: %s \n", err)
+			logger.Log.WithModule(a.projectName).Infof("checked merge request notes failed, error: %s \n", err)
 			return
 		}
 		err = a.accept(mr)
 		if err != nil {
-			logger.Log.Infof("auto merge request faild, error: %s \n", err)
+			logger.Log.WithModule(a.projectName).Infof("auto merge request failed, error: %s \n", err)
 			return
 		}
 	}
@@ -94,7 +97,7 @@ func (a *autoMergeRequest) checkNotes(mr *gitlab.MergeRequest) error {
 		Filter(func(n *gitlab.Note) bool {
 			return stream.Of(a.taskConfig.MergeProjects.Reviewers...).
 				AnyMatch(func(s string) bool {
-					return s == n.Author.Username
+					return strings.ToLower(s) == strings.ToLower(n.Author.Username)
 				})
 		}).Count()
 
@@ -113,6 +116,6 @@ func (a *autoMergeRequest) accept(mr *gitlab.MergeRequest) error {
 	if accept.State != "merged" {
 		return errors.New(fmt.Sprintf("accept merge request failed, error %s", accept.MergeError))
 	}
-	logger.Log.Infof("merge request success.")
+	logger.Log.WithModule(a.projectName).Infoln("merge request success.")
 	return nil
 }

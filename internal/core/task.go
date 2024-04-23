@@ -62,6 +62,7 @@ func (t *AutoCreateMrTask) Init() error {
 }
 
 func (t *AutoCreateMrTask) Run() {
+
 	select {
 	case <-t.ctx.Done():
 		fmt.Printf(" CreateMR Task has stopped\n")

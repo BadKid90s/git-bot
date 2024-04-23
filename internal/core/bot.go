@@ -6,7 +6,6 @@ import (
 	"gitlab-bot/logger"
 	"golang.org/x/net/context"
 	"sync"
-	"time"
 )
 
 type GitLabBot struct {
@@ -28,41 +27,31 @@ func NewGitLabBot() *GitLabBot {
 	}
 }
 func (b *GitLabBot) Start() {
-	logger.Log.Infoln("bot starting .")
+	logger.Log.WithModule("bot").Infoln("bot starting .")
 
-	tick := time.Tick(3 * time.Second)
+	config, err := initConfig(b.configFile)
+	if err != nil {
+		logger.Log.WithModule("bot").Errorln(err.Error())
+		return
+	}
+	logger.Log.WithModule("bot").Infoln("bot config parse success.")
+	b.cfg = config
+
+	b.runMrTasks()
+	b.runAutoCreateMrTasks()
+	logger.Log.WithModule("bot").Infoln("bot start success.")
+
 	for {
 		select {
-		case <-tick:
-			t := time.Now()
-			now := t.Format("2006-01-02 15:04:05")
-			logger.Log.Printf("当前时间： %s  \n", now)
+		case <-b.ctx.Done():
+			// 如果context被取消，则停止定时任务
+			logger.Log.Infoln("定时任务被停止")
+			return
+			//default:
+			//	time.Sleep(time.Second * 1)
+			//	log.Println("select")
 		}
 	}
-
-	//config, err := initConfig(b.configFile)
-	//if err != nil {
-	//	logger.Log.Errorln(err.Error())
-	//	return
-	//}
-	//logger.Log.Infoln("bot config parse success.")
-	//b.cfg = config
-	//
-	//b.runMrTasks()
-	//b.runAutoCreateMrTasks()
-	//logger.Log.Infoln("bot start success.")
-	//
-	//for {
-	//	select {
-	//	case <-b.ctx.Done():
-	//		// 如果context被取消，则停止定时任务
-	//		logger.Log.Infoln("定时任务被停止")
-	//		return
-	//		//default:
-	//		//	time.Sleep(time.Second * 1)
-	//		//	log.Println("select")
-	//	}
-	//}
 }
 
 func (b *GitLabBot) Stop() {
@@ -77,6 +66,7 @@ func (b *GitLabBot) runMrTasks() {
 
 		err := task.Init()
 		if err != nil {
+			logger.Log.WithModule("bot").Errorln(err.Error())
 			continue
 		}
 		b.wg.Add(1)
@@ -94,13 +84,14 @@ func (b *GitLabBot) runAutoCreateMrTasks() {
 		task := NewAutoCreateMrTask(project, b.cfg.Global, b.ctx)
 		err := task.Init()
 		if err != nil {
+			logger.Log.WithModule("bot").Errorln(err.Error())
 			continue
 		}
 		err = c.AddFunc(project.CreateTime, func() {
 			task.Run()
 		})
 		if err != nil {
-			logger.Log.Errorf("task runing error, error: %s \n", err)
+			logger.Log.WithModule("bot").Errorf("task runing error, error: %s \n", err)
 			b.wg.Done()
 		}
 	}
